@@ -6,6 +6,30 @@ const Calculator = () => {
     const [operator, setOperator] = useState(null);
     const [waitingForOperand, setWaitingForOperand] = useState(false);
     const [darkMode, setDarkMode] = useState(false);
+    const [history, setHistory] = useState(() => {
+        try {
+            const savedHistory = localStorage.getItem('calculatorHistory');
+            return savedHistory ? JSON.parse(savedHistory) : [];
+        } catch (error) {
+            console.error('Ошибка загрузки истории:', error);
+            return [];
+        }
+    });
+
+    useEffect(() => {
+        const savedHistory = localStorage.getItem('calculatorHistory');
+        if (savedHistory) {
+            setHistory(JSON.parse(savedHistory));
+        }
+    }, []);
+
+    useEffect(() => {
+        try {
+            localStorage.setItem('calculatorHistory', JSON.stringify(history));
+        } catch (error) {
+            console.error('Ошибка сохранения истории:', error);
+        }
+    }, [history]);
 
     useEffect(() => {
         const savedValue = localStorage.getItem('calculatorValue');
@@ -90,11 +114,31 @@ const Calculator = () => {
                 return;
         }
 
+        if (!isNaN(newResult)) {
+            const newEntry = {
+                expression: `${previousValue} ${operator} ${currentValue}`,
+                result: newResult,
+                timestamp: new Date().toISOString()
+            };
+
+            setHistory(prev => {
+                const updatedHistory = [newEntry, ...prev].slice(0, 10);
+                return updatedHistory;
+            });
+        }
+
         setInput(newResult.toString());
         setOperator(null);
         setResult(newResult);
         setWaitingForOperand(true);
+    }
+
+    const clearHistory = () => {
+        if (window.confirm('Очистить всю историю операций?')) {
+            setHistory([]);
+        }
     };
+
     const handleClear = () => {
         setInput('0');
         setOperator(null);
@@ -151,6 +195,26 @@ const Calculator = () => {
                     <button onClick={() => handleNumber('0')}>0</button>
                     <button onClick={() => handleNumber('.')}>.</button>
                     <button className="equals" onClick={handleEquals}>=</button>
+                </div>
+                <div className="history-section">
+                    <div className="history-header">
+                        <h3>Operations History</h3>
+                        <button onClick={clearHistory} className="clear-history">
+                            Clear History
+                        </button>
+                    </div>
+                    <div className="history-list">
+                        {history.length > 0 ? (
+                            history.map((entry, index) => (
+                                <div key={index} className="history-entry">
+                                    <span>{entry.expression} =</span>
+                                    <span>{entry.result}</span>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="empty-history">Operations History</div>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>
