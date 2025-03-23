@@ -24,10 +24,8 @@ const Calculator = () => {
         const handleKeyPress = (e) => {
             if (e.key >= '0' && e.key <= '9') {
                 handleNumber(e.key);
-            } else if (e.key === '*') {
-                handleOperator('*');
-            } else if (e.key === '/') {
-                handleOperator('/');
+            } else if (e.key === '+' || e.key === '-' || e.key === '*' || e.key === '/') {
+                handleOperator(e.key);
             } else if (e.key === '=' || e.key === 'Enter') {
                 handleEquals();
             } else if (e.key === 'Escape') {
@@ -69,6 +67,12 @@ const Calculator = () => {
         let newResult;
 
         switch (operator) {
+            case '+':
+                newResult = previousValue + currentValue;
+                break;
+            case '-':
+                newResult = previousValue - currentValue;
+                break;
             case '*':
                 newResult = previousValue * currentValue;
                 break;
@@ -91,7 +95,6 @@ const Calculator = () => {
         setResult(newResult);
         setWaitingForOperand(true);
     };
-
     const handleClear = () => {
         setInput('0');
         setOperator(null);
@@ -134,10 +137,12 @@ const Calculator = () => {
                     <button onClick={() => handleNumber('7')}>7</button>
                     <button onClick={() => handleNumber('8')}>8</button>
                     <button onClick={() => handleNumber('9')}>9</button>
+                    <button className="operator" onClick={() => handleOperator('+')}>+</button>
 
                     <button onClick={() => handleNumber('4')}>4</button>
                     <button onClick={() => handleNumber('5')}>5</button>
                     <button onClick={() => handleNumber('6')}>6</button>
+                    <button className="operator" onClick={() => handleOperator('-')}>-</button>
 
                     <button onClick={() => handleNumber('1')}>1</button>
                     <button onClick={() => handleNumber('2')}>2</button>
